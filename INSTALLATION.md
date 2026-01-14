@@ -110,9 +110,7 @@ npm test
 
 ## 📞 Support
 
-- **Telegram**: [@YourTelegramHandle](https://t.me/your_telegram_handle)
-- **Email**: your-email@example.com
-- **Discord**: [Join Community](https://discord.gg/your_server)
+- **Email**: harryverma0002@example.com
 
 ## ⚠️ Important Notes
 
