@@ -148,50 +148,59 @@ function configureTradingSettings() {
 function configureCookies() {
     console.log('\n🍪 STAKE.COM AUTHENTICATION');
     console.log('============================\n');
+    console.log('📋 Instructions:');
+    console.log('   1. Login to Stake.com in your browser');
+    console.log('   2. Open Developer Tools (F12 or Cmd+Option+I)');
+    console.log('   3. Go to Network tab');
+    console.log('   4. Make any bet to capture requests');
+    console.log('   5. Find any request to Stake.com');
+    console.log('   6. Copy the entire Cookie header value\n');
     
-    rl.question('Enter your Stake.com cookies: ', (cookies) => {
-        if (!cookies || cookies.trim().length < 20) {
-            console.log('❌ Invalid cookies! Please enter valid Stake.com cookies.');
-            console.log('💡 Cookies should be long strings from browser developer tools.');
+    rl.question('Paste your complete Stake.com cookie string: ', (cookieString) => {
+        if (!cookieString || cookieString.trim().length < 50) {
+            console.log('❌ Invalid cookie string! Please paste the complete cookie header.');
+            console.log('💡 Cookie should be a very long string with multiple values.');
             rl.close();
             return;
         }
         
-        rl.question('Enter your x-access-token: ', (accessToken) => {
-            if (!accessToken || accessToken.trim().length < 20) {
-                console.log('❌ Invalid access token! Please enter valid x-access-token.');
-                console.log('💡 Access token should be from Stake.com API requests.');
-                rl.close();
-                return;
-            }
-            
-            rl.question('Enter your x-lockdown-token: ', (lockdownToken) => {
-                if (!lockdownToken || lockdownToken.trim().length < 20) {
-                    console.log('❌ Invalid lockdown token! Please enter valid x-lockdown-token.');
-                    console.log('💡 Lockdown token should be from Stake.com API requests.');
-                    rl.close();
-                    return;
-                }
-                
-                // Save complete configuration
-                const botConfig = {
-                    cookies: cookies.trim(),
-                    accessToken: accessToken.trim(),
-                    lockdownToken: lockdownToken.trim(),
-                    tradingConfig: CONFIG,
-                    configuredAt: new Date().toISOString()
-                };
-                
-                try {
-                    fs.writeFileSync('bot-config.json', JSON.stringify(botConfig, null, 2));
-                    console.log('\n✅ Complete configuration saved successfully!');
-                    startTradingBot(botConfig);
-                } catch (error) {
-                    console.log('❌ Error saving configuration:', error.message);
-                    rl.close();
-                }
-            });
-        });
+        // Extract tokens from cookie string
+        const cookies = cookieString.trim();
+        
+        // Extract session token (this is usually the access token)
+        const sessionMatch = cookies.match(/session=([^;]+)/);
+        const accessToken = sessionMatch ? sessionMatch[1] : '';
+        
+        // For Stake.com, we can use the session as both access and lockdown token
+        // or extract other specific tokens if they exist in cookies
+        const lockdownToken = accessToken; // Using same token for both
+        
+        if (!accessToken) {
+            console.log('❌ Could not find session token in cookies!');
+            console.log('💡 Make sure you copied the complete cookie string from a logged-in Stake.com session.');
+            rl.close();
+            return;
+        }
+        
+        // Save complete configuration
+        const botConfig = {
+            cookies: cookies,
+            accessToken: accessToken,
+            lockdownToken: lockdownToken,
+            tradingConfig: CONFIG,
+            configuredAt: new Date().toISOString()
+        };
+        
+        try {
+            fs.writeFileSync('bot-config.json', JSON.stringify(botConfig, null, 2));
+            console.log('\n✅ Authentication configured successfully!');
+            console.log(`   Session Token: ${accessToken.substring(0, 20)}...`);
+            console.log(`   Cookie Length: ${cookies.length} characters`);
+            startTradingBot(botConfig);
+        } catch (error) {
+            console.log('❌ Error saving configuration:', error.message);
+            rl.close();
+        }
     });
 }
 
@@ -201,9 +210,8 @@ function startTradingBot(config) {
     console.log('================================\n');
     
     console.log('🔧 Authentication:');
-    console.log(`   Cookies: ${config.cookies.substring(0, 30)}...`);
-    console.log(`   Access Token: ${config.accessToken.substring(0, 15)}...`);
-    console.log(`   Lockdown Token: ${config.lockdownToken.substring(0, 15)}...`);
+    console.log(`   Cookies: ${config.cookies.substring(0, 50)}...`);
+    console.log(`   Session Token: ${config.accessToken.substring(0, 20)}...`);
     console.log(`   Configured: ${config.configuredAt}\n`);
     
     console.log('🎯 Trading Settings:');
@@ -323,14 +331,8 @@ async function startBot() {
                 console.log('🔧 First time setup - Configuration required.\n');
                 console.log('📋 You will configure:');
                 console.log('   1. Trading parameters (bet amounts, multipliers, limits)');
-                console.log('   2. Stake.com authentication (cookies and tokens)\n');
-                console.log('💡 How to get Stake.com credentials:');
-                console.log('   1. Login to Stake.com in your browser');
-                console.log('   2. Open Developer Tools (F12 or Cmd+Option+I)');
-                console.log('   3. Go to Network tab');
-                console.log('   4. Make any bet to capture requests');
-                console.log('   5. Find a request to Stake.com API');
-                console.log('   6. Copy Cookie header and x-access-token, x-lockdown-token\n');
+                console.log('   2. Stake.com authentication (just paste your cookies)\n');
+                console.log('💡 Simple setup - just copy cookies from browser!');
                 
                 configureTradingSettings();
             }

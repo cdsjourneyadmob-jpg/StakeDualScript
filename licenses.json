@@ -6,6 +6,13 @@
     "endDate": "2030-12-31",
     "status": "active"
   },
+  "1234567890": {
+    "type": "admin",
+    "email": "admin@stakedualscript.com",
+    "startDate": "2024-01-01",
+    "endDate": "2030-12-31",
+    "status": "active"
+  },
   "647181833": {
     "type": "trial",
     "email": "harryverma0002@gmail.com",
