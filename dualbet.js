@@ -14,28 +14,58 @@ console.log('🚀 StakeDualScript - Professional Gambling Bot v2.0');
 console.log('==================================================\n');
 
 // License validation function
-function validateLicense(key) {
+async function validateLicense(key) {
     try {
-        // Read licenses from file
-        const licensesData = fs.readFileSync('licenses.json', 'utf8');
-        const licenses = JSON.parse(licensesData);
+        // First try local file (fallback)
+        if (fs.existsSync('licenses.json')) {
+            const licensesData = fs.readFileSync('licenses.json', 'utf8');
+            const licenses = JSON.parse(licensesData);
+            const license = licenses[key];
+            if (license) {
+                const now = new Date();
+                const expiry = new Date(license.endDate);
+                return now <= expiry && license.status === 'active';
+            }
+        }
+
+        // GitHub API validation (primary method)
+        const githubUrl = 'https://raw.githubusercontent.com/cdsjourneyadmob-jpg/StakeDualScript/main/licenses.json';
         
-        // Check if license exists and is valid
-        const license = licenses.find(l => l.key === key);
-        if (!license) return false;
+        return new Promise((resolve) => {
+            https.get(githubUrl, (res) => {
+                let data = '';
+                res.on('data', chunk => data += chunk);
+                res.on('end', () => {
+                    try {
+                        const licenses = JSON.parse(data);
+                        const license = licenses[key];
+                        if (!license) {
+                            resolve(false);
+                            return;
+                        }
+                        
+                        // Check expiry and status
+                        const now = new Date();
+                        const expiry = new Date(license.endDate);
+                        const isValid = now <= expiry && license.status === 'active';
+                        resolve(isValid);
+                    } catch (error) {
+                        console.log('⚠️  Using offline validation...');
+                        resolve(false);
+                    }
+                });
+            }).on('error', () => {
+                console.log('⚠️  Network error, using offline validation...');
+                resolve(false);
+            });
+        });
         
-        // Check expiry
-        const now = new Date();
-        const expiry = new Date(license.expiry);
-        return now <= expiry;
     } catch (error) {
-        // Fallback validation for demo
+        // Final fallback for demo keys
         const validKeys = [
             'DEMO-WEEKLY-2024',
             'DEMO-MONTHLY-2024',
-            'TEST-LICENSE-KEY',
-            'CUSTOMER-WEEKLY-001',
-            'CUSTOMER-MONTHLY-001'
+            'TEST-LICENSE-KEY'
         ];
         return validKeys.includes(key);
     }
@@ -53,11 +83,14 @@ const CONFIG = {
 };
 
 // Main bot function
-function startBot() {
-    rl.question('🔑 Enter your license key: ', (licenseKey) => {
+async function startBot() {
+    rl.question('🔑 Enter your license key: ', async (licenseKey) => {
         console.log('\n🔍 Validating license...');
+        console.log('🌐 Checking with license server...');
         
-        if (validateLicense(licenseKey)) {
+        const isValid = await validateLicense(licenseKey);
+        
+        if (isValid) {
             console.log('✅ License valid! Initializing StakeDualScript Bot...\n');
             
             console.log('🎯 Bot Configuration:');

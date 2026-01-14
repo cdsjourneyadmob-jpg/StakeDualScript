@@ -12,5 +12,19 @@
     "startDate": "2026-01-14",
     "endDate": "2026-01-24",
     "status": "active"
+  },
+  "CUSTOMER-WEEKLY-001": {
+    "type": "weekly",
+    "email": "customer1@example.com",
+    "startDate": "2026-01-14",
+    "endDate": "2026-01-21",
+    "status": "active"
+  },
+  "CUSTOMER-MONTHLY-001": {
+    "type": "monthly", 
+    "email": "customer2@example.com",
+    "startDate": "2026-01-14",
+    "endDate": "2026-02-14",
+    "status": "active"
   }
 }
