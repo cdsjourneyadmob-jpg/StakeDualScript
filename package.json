@@ -1,0 +1,36 @@
+{
+  "name": "stakedualscript",
+  "version": "2.0.0",
+  "description": "Professional Dual-Game Automation Bot for Stake.com",
+  "main": "dualbet.js",
+  "scripts": {
+    "start": "node dualbet.js",
+    "test": "node test-connection.js",
+    "admin": "node admin-license.js"
+  },
+  "keywords": [
+    "stake",
+    "gambling",
+    "bot",
+    "automation",
+    "crash",
+    "slide",
+    "trading"
+  ],
+  "author": "StakeDualScript Team",
+  "license": "Commercial",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cdsjourneyadmob-jpg/StakeDualScript.git"
+  },
+  "homepage": "https://github.com/cdsjourneyadmob-jpg/StakeDualScript",
+  "bugs": {
+    "url": "https://github.com/cdsjourneyadmob-jpg/StakeDualScript/issues"
+  }
+}

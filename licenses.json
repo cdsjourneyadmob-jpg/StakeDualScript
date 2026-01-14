@@ -1,0 +1,16 @@
+{
+  "123456789": {
+    "type": "admin",
+    "email": "admin@stakedualscript.com",
+    "startDate": "2024-01-01",
+    "endDate": "2030-12-31",
+    "status": "active"
+  },
+  "647181833": {
+    "type": "trial",
+    "email": "harryverma0002@gmail.com",
+    "startDate": "2026-01-14",
+    "endDate": "2026-01-24",
+    "status": "active"
+  }
+}
