@@ -329,12 +329,22 @@ async function startBot() {
                 }
             } else {
                 console.log('🔧 First time setup - Configuration required.\n');
-                console.log('📋 You will configure:');
-                console.log('   1. Trading parameters (bet amounts, multipliers, limits)');
-                console.log('   2. Stake.com authentication (just paste your cookies)\n');
-                console.log('💡 Simple setup - just copy cookies from browser!');
+                console.log('📋 Setup Options:');
+                console.log('   1. Quick Setup (use default settings + enter cookies)');
+                console.log('   2. Custom Setup (configure everything)\n');
                 
-                configureTradingSettings();
+                rl.question('Choose setup type (1 for Quick, 2 for Custom): ', (setupChoice) => {
+                    if (setupChoice === '1') {
+                        console.log('✅ Using default trading settings:');
+                        console.log(`   Base Bet: ₹${CONFIG.BASE_BET}`);
+                        console.log(`   Cashout: ${CONFIG.NORMAL_CASHOUT}x`);
+                        console.log(`   Max Loss: ₹${CONFIG.MAX_SESSION_LOSS}\n`);
+                        configureCookies();
+                    } else {
+                        console.log('🔧 Custom configuration selected...\n');
+                        configureTradingSettings();
+                    }
+                });
             }
             
         } else {
