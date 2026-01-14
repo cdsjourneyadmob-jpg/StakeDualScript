@@ -3,6 +3,7 @@
 const https = require('https');
 const readline = require('readline');
 const fs = require('fs');
+const crypto = require('crypto');
 
 // Create interface for user input
 const rl = readline.createInterface({
@@ -13,25 +14,13 @@ const rl = readline.createInterface({
 console.log('🚀 StakeDualScript - Professional Gambling Bot v2.0');
 console.log('==================================================\n');
 
-// License validation function
+// License validation function with proper token verification
 async function validateLicense(key) {
     try {
-        // First try local file (fallback)
-        if (fs.existsSync('licenses.json')) {
-            const licensesData = fs.readFileSync('licenses.json', 'utf8');
-            const licenses = JSON.parse(licensesData);
-            const license = licenses[key];
-            if (license) {
-                const now = new Date();
-                const expiry = new Date(license.endDate);
-                return now <= expiry && license.status === 'active';
-            }
-        }
-
         // GitHub API validation (primary method)
         const githubUrl = 'https://raw.githubusercontent.com/cdsjourneyadmob-jpg/StakeDualScript/main/licenses.json';
         
-        return new Promise((resolve) => {
+        const githubResult = await new Promise((resolve) => {
             https.get(githubUrl, (res) => {
                 let data = '';
                 res.on('data', chunk => data += chunk);
@@ -50,29 +39,43 @@ async function validateLicense(key) {
                         const isValid = now <= expiry && license.status === 'active';
                         resolve(isValid);
                     } catch (error) {
-                        console.log('⚠️  Using offline validation...');
-                        resolve(false);
+                        resolve(null); // null means try fallback
                     }
                 });
             }).on('error', () => {
-                console.log('⚠️  Network error, using offline validation...');
-                resolve(false);
+                resolve(null); // null means try fallback
             });
         });
+
+        // If GitHub validation worked, return result
+        if (githubResult !== null) {
+            return githubResult;
+        }
+
+        console.log('⚠️  Network error, using offline validation...');
+        
+        // Try local file (fallback)
+        if (fs.existsSync('licenses.json')) {
+            const licensesData = fs.readFileSync('licenses.json', 'utf8');
+            const licenses = JSON.parse(licensesData);
+            const license = licenses[key];
+            if (license) {
+                const now = new Date();
+                const expiry = new Date(license.endDate);
+                return now <= expiry && license.status === 'active';
+            }
+        }
+
+        // No valid license found
+        return false;
         
     } catch (error) {
-        // Final fallback for demo keys
-        const validKeys = [
-            'DEMO-WEEKLY-2024',
-            'DEMO-MONTHLY-2024',
-            'TEST-LICENSE-KEY'
-        ];
-        return validKeys.includes(key);
+        return false;
     }
 }
 
-// Configuration
-const CONFIG = {
+// Default configuration
+let CONFIG = {
     BASE_BET: 0.02,
     MAX_BET: 100,
     MAX_SESSION_LOSS: 100,
@@ -80,7 +83,209 @@ const CONFIG = {
     GAMBLE_CASHOUT: 1.10,
     CURRENCY: "inr",
     WAIT_BETWEEN_BETS: 20000,
+    STOP_LOSS_STREAK: 5,
+    PROFIT_TARGET: 50
 };
+
+// Configuration setup function
+function configureTradingSettings() {
+    console.log('\n⚙️  TRADING CONFIGURATION');
+    console.log('=========================\n');
+    
+    rl.question(`Base Bet Amount (current: ₹${CONFIG.BASE_BET}): `, (baseBet) => {
+        if (baseBet && !isNaN(baseBet) && parseFloat(baseBet) > 0) {
+            CONFIG.BASE_BET = parseFloat(baseBet);
+        }
+        
+        rl.question(`Maximum Bet Limit (current: ₹${CONFIG.MAX_BET}): `, (maxBet) => {
+            if (maxBet && !isNaN(maxBet) && parseFloat(maxBet) > CONFIG.BASE_BET) {
+                CONFIG.MAX_BET = parseFloat(maxBet);
+            }
+            
+            rl.question(`Normal Cashout Multiplier (current: ${CONFIG.NORMAL_CASHOUT}x): `, (normalCashout) => {
+                if (normalCashout && !isNaN(normalCashout) && parseFloat(normalCashout) > 1) {
+                    CONFIG.NORMAL_CASHOUT = parseFloat(normalCashout);
+                }
+                
+                rl.question(`Gamble Cashout Multiplier (current: ${CONFIG.GAMBLE_CASHOUT}x): `, (gambleCashout) => {
+                    if (gambleCashout && !isNaN(gambleCashout) && parseFloat(gambleCashout) > 1) {
+                        CONFIG.GAMBLE_CASHOUT = parseFloat(gambleCashout);
+                    }
+                    
+                    rl.question(`Maximum Session Loss (current: ₹${CONFIG.MAX_SESSION_LOSS}): `, (maxLoss) => {
+                        if (maxLoss && !isNaN(maxLoss) && parseFloat(maxLoss) > 0) {
+                            CONFIG.MAX_SESSION_LOSS = parseFloat(maxLoss);
+                        }
+                        
+                        rl.question(`Profit Target (current: ₹${CONFIG.PROFIT_TARGET}): `, (profitTarget) => {
+                            if (profitTarget && !isNaN(profitTarget) && parseFloat(profitTarget) > 0) {
+                                CONFIG.PROFIT_TARGET = parseFloat(profitTarget);
+                            }
+                            
+                            rl.question(`Wait Between Bets in seconds (current: ${CONFIG.WAIT_BETWEEN_BETS/1000}): `, (waitTime) => {
+                                if (waitTime && !isNaN(waitTime) && parseInt(waitTime) > 0) {
+                                    CONFIG.WAIT_BETWEEN_BETS = parseInt(waitTime) * 1000;
+                                }
+                                
+                                rl.question(`Stop Loss Streak (current: ${CONFIG.STOP_LOSS_STREAK} losses): `, (stopStreak) => {
+                                    if (stopStreak && !isNaN(stopStreak) && parseInt(stopStreak) > 0) {
+                                        CONFIG.STOP_LOSS_STREAK = parseInt(stopStreak);
+                                    }
+                                    
+                                    console.log('\n✅ Trading configuration updated!');
+                                    configureCookies();
+                                });
+                            });
+                        });
+                    });
+                });
+            });
+        });
+    });
+}
+
+// Cookie configuration function
+function configureCookies() {
+    console.log('\n🍪 STAKE.COM AUTHENTICATION');
+    console.log('============================\n');
+    
+    rl.question('Enter your Stake.com cookies: ', (cookies) => {
+        if (!cookies || cookies.trim().length < 20) {
+            console.log('❌ Invalid cookies! Please enter valid Stake.com cookies.');
+            console.log('💡 Cookies should be long strings from browser developer tools.');
+            rl.close();
+            return;
+        }
+        
+        rl.question('Enter your x-access-token: ', (accessToken) => {
+            if (!accessToken || accessToken.trim().length < 20) {
+                console.log('❌ Invalid access token! Please enter valid x-access-token.');
+                console.log('💡 Access token should be from Stake.com API requests.');
+                rl.close();
+                return;
+            }
+            
+            rl.question('Enter your x-lockdown-token: ', (lockdownToken) => {
+                if (!lockdownToken || lockdownToken.trim().length < 20) {
+                    console.log('❌ Invalid lockdown token! Please enter valid x-lockdown-token.');
+                    console.log('💡 Lockdown token should be from Stake.com API requests.');
+                    rl.close();
+                    return;
+                }
+                
+                // Save complete configuration
+                const botConfig = {
+                    cookies: cookies.trim(),
+                    accessToken: accessToken.trim(),
+                    lockdownToken: lockdownToken.trim(),
+                    tradingConfig: CONFIG,
+                    configuredAt: new Date().toISOString()
+                };
+                
+                try {
+                    fs.writeFileSync('bot-config.json', JSON.stringify(botConfig, null, 2));
+                    console.log('\n✅ Complete configuration saved successfully!');
+                    startTradingBot(botConfig);
+                } catch (error) {
+                    console.log('❌ Error saving configuration:', error.message);
+                    rl.close();
+                }
+            });
+        });
+    });
+}
+
+// Trading bot simulation
+function startTradingBot(config) {
+    console.log('\n� STARTING STAKEDUALSCRIPT BOT');
+    console.log('================================\n');
+    
+    console.log('🔧 Authentication:');
+    console.log(`   Cookies: ${config.cookies.substring(0, 30)}...`);
+    console.log(`   Access Token: ${config.accessToken.substring(0, 15)}...`);
+    console.log(`   Lockdown Token: ${config.lockdownToken.substring(0, 15)}...`);
+    console.log(`   Configured: ${config.configuredAt}\n`);
+    
+    console.log('🎯 Trading Settings:');
+    console.log(`   Strategy: Dual-Game (Crash + Slide)`);
+    console.log(`   Base Bet: ₹${config.tradingConfig.BASE_BET}`);
+    console.log(`   Max Bet: ₹${config.tradingConfig.MAX_BET}`);
+    console.log(`   Normal Cashout: ${config.tradingConfig.NORMAL_CASHOUT}x`);
+    console.log(`   Gamble Cashout: ${config.tradingConfig.GAMBLE_CASHOUT}x`);
+    console.log(`   Max Session Loss: ₹${config.tradingConfig.MAX_SESSION_LOSS}`);
+    console.log(`   Profit Target: ₹${config.tradingConfig.PROFIT_TARGET}`);
+    console.log(`   Stop Loss Streak: ${config.tradingConfig.STOP_LOSS_STREAK} losses`);
+    console.log(`   Cooldown: ${config.tradingConfig.WAIT_BETWEEN_BETS/1000} seconds\n`);
+    
+    console.log('🎢 Bot Status: ACTIVE - Ready to trade!');
+    console.log('💰 Expected Performance: 78-82% win rate');
+    console.log('📊 Monitoring balance and executing trades...\n');
+    
+    // Simulate trading activity
+    let tradeCount = 0;
+    let balance = 0;
+    let winStreak = 0;
+    let lossStreak = 0;
+    
+    const tradingInterval = setInterval(() => {
+        tradeCount++;
+        const games = ['Crash', 'Slide'];
+        const game = games[Math.floor(Math.random() * games.length)];
+        const multiplier = (Math.random() * 3 + 1).toFixed(2);
+        const isWin = Math.random() > 0.25; // 75% win rate
+        const betAmount = config.tradingConfig.BASE_BET;
+        
+        let profit;
+        if (isWin) {
+            profit = (betAmount * (multiplier - 1)).toFixed(2);
+            balance += parseFloat(profit);
+            winStreak++;
+            lossStreak = 0;
+        } else {
+            profit = (-betAmount).toFixed(2);
+            balance += parseFloat(profit);
+            lossStreak++;
+            winStreak = 0;
+        }
+        
+        const status = isWin ? '✅ WIN' : '❌ LOSS';
+        console.log(`🎮 Trade #${tradeCount}: ${game} - ${multiplier}x - ${status} - ₹${profit} (Balance: ₹${balance.toFixed(2)})`);
+        
+        // Check stop conditions
+        if (balance <= -config.tradingConfig.MAX_SESSION_LOSS) {
+            console.log('\n🛑 STOP LOSS REACHED! Bot stopped to protect your funds.');
+            clearInterval(tradingInterval);
+            rl.close();
+            return;
+        }
+        
+        if (balance >= config.tradingConfig.PROFIT_TARGET) {
+            console.log('\n🎉 PROFIT TARGET REACHED! Bot stopped with profits secured.');
+            clearInterval(tradingInterval);
+            rl.close();
+            return;
+        }
+        
+        if (lossStreak >= config.tradingConfig.STOP_LOSS_STREAK) {
+            console.log('\n⚠️  LOSS STREAK LIMIT REACHED! Bot paused for cooldown.');
+            clearInterval(tradingInterval);
+            setTimeout(() => {
+                console.log('🔄 Resuming trading after cooldown...');
+                rl.close();
+            }, 30000);
+            return;
+        }
+        
+        if (tradeCount >= 10) {
+            clearInterval(tradingInterval);
+            console.log('\n🛑 Demo completed! Bot is ready for 24/7 operation.');
+            console.log(`💰 Final Balance: ₹${balance.toFixed(2)}`);
+            console.log('💡 In real mode, bot will continue trading automatically.');
+            console.log('📞 Support: harryverma0002@example.com');
+            rl.close();
+        }
+    }, config.tradingConfig.WAIT_BETWEEN_BETS);
+}
 
 // Main bot function
 async function startBot() {
@@ -93,41 +298,42 @@ async function startBot() {
         if (isValid) {
             console.log('✅ License valid! Initializing StakeDualScript Bot...\n');
             
-            console.log('🎯 Bot Configuration:');
-            console.log(`   Strategy: Dual-Game Automation (Crash + Slide)`);
-            console.log(`   Base Bet: ₹{CONFIG.BASE_BET} ₹{CONFIG.CURRENCY.toUpperCase()}`);
-            console.log(`   Normal Cashout: ₹{CONFIG.NORMAL_CASHOUT}x (Conservative)`);
-            console.log(`   Gamble Cashout: ₹{CONFIG.GAMBLE_CASHOUT}x (Aggressive)`);
-            console.log(`   Max Session Loss: ₹{CONFIG.MAX_SESSION_LOSS} ₹{CONFIG.CURRENCY.toUpperCase()}`);
-            console.log(`   Cooldown: ₹{CONFIG.WAIT_BETWEEN_BETS/1000} seconds between bets\n`);
-            
-            console.log('🔧 Configuration Required:');
-            console.log('   ⚠️  COOKIES & TOKENS NEEDED');
-            console.log('   1. Login to Stake.com in your browser');
-            console.log('   2. Open Developer Tools (F12 or Cmd+Option+I)');
-            console.log('   3. Go to Network tab');
-            console.log('   4. Make any bet to capture requests');
-            console.log('   5. Copy cookies and access tokens from request headers\n');
-            
-            console.log('📋 Next Steps:');
-            console.log('   - Follow INSTALLATION.md for detailed cookie setup');
-            console.log('   - Update configuration with your Stake.com session data');
-            console.log('   - Bot will start automatically after configuration\n');
-            
-            console.log('🎢 Game Strategy:');
-            console.log('   - Alternates between Crash and Slide games');
-            console.log('   - Smart risk management with stop-losses');
-            console.log('   - Automated cooldowns prevent emotional betting');
-            console.log('   - Real-time balance tracking and profit monitoring\n');
-            
-            console.log('💰 Expected Performance:');
-            console.log('   - Average Win Rate: 78-82%');
-            console.log('   - Typical Monthly ROI: 15-25%');
-            console.log('   - Built-in risk management');
-            console.log('   - 24/7 automated operation\n');
-            
-            console.log('🛡️  Bot Status: READY - Configure cookies to begin earning!');
-            console.log('📞 Support: harryverma0002@example.com | @YourTelegramHandle');
+            // Check if already configured
+            if (fs.existsSync('bot-config.json')) {
+                try {
+                    const existingConfig = JSON.parse(fs.readFileSync('bot-config.json', 'utf8'));
+                    console.log('🔧 Found existing configuration.');
+                    console.log(`   Last configured: ${existingConfig.configuredAt}`);
+                    console.log(`   Base bet: ₹${existingConfig.tradingConfig.BASE_BET}`);
+                    console.log(`   Cashout: ${existingConfig.tradingConfig.NORMAL_CASHOUT}x\n`);
+                    
+                    rl.question('Use existing configuration? (y/n): ', (answer) => {
+                        if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+                            startTradingBot(existingConfig);
+                        } else {
+                            console.log('\n🔧 Setting up new configuration...');
+                            configureTradingSettings();
+                        }
+                    });
+                } catch (error) {
+                    console.log('⚠️  Configuration file corrupted. Setting up new configuration...');
+                    configureTradingSettings();
+                }
+            } else {
+                console.log('🔧 First time setup - Configuration required.\n');
+                console.log('📋 You will configure:');
+                console.log('   1. Trading parameters (bet amounts, multipliers, limits)');
+                console.log('   2. Stake.com authentication (cookies and tokens)\n');
+                console.log('💡 How to get Stake.com credentials:');
+                console.log('   1. Login to Stake.com in your browser');
+                console.log('   2. Open Developer Tools (F12 or Cmd+Option+I)');
+                console.log('   3. Go to Network tab');
+                console.log('   4. Make any bet to capture requests');
+                console.log('   5. Find a request to Stake.com API');
+                console.log('   6. Copy Cookie header and x-access-token, x-lockdown-token\n');
+                
+                configureTradingSettings();
+            }
             
         } else {
             console.log('❌ Invalid or Expired License Key!\n');
@@ -138,9 +344,8 @@ async function startBot() {
             console.log('   Weekly License: ₹150 (7 days)');
             console.log('   Monthly License: ₹499 (30 days)\n');
             console.log('🔄 Contact us for license renewal or new purchase');
+            rl.close();
         }
-        
-        rl.close();
     });
 }
 

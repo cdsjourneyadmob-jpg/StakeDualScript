@@ -19,6 +19,7 @@
     "assets": [
       "licenses.json"
     ],
+    "scripts": [],
     "outputPath": "dist"
   },
   "keywords": [
