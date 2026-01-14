@@ -27,8 +27,8 @@
 - **Monthly License**: $499 (30 days)
 
 **Get Your License:**
-- **Telegram**: [@YourTelegramHandle](https://t.me/your_telegram_handle)
-- **Email**: harryverma0002@example.com
+- **Whatsapp**: +917018238245
+- **Email**: harryverma0002@gmail.com
 
 ## 🚀 Quick Start
 
