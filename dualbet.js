@@ -328,21 +328,21 @@ async function startBot() {
                     configureTradingSettings();
                 }
             } else {
-                console.log('🔧 First time setup - Configuration required.\n');
-                console.log('📋 Setup Options:');
-                console.log('   1. Quick Setup (use default settings + enter cookies)');
-                console.log('   2. Custom Setup (configure everything)\n');
+                console.log('🔧 First time setup - Cookie configuration required.\n');
+                console.log('📋 Default Settings Applied:');
+                console.log(`   ✅ Base Bet: ₹${CONFIG.BASE_BET}`);
+                console.log(`   ✅ Cashout: ${CONFIG.NORMAL_CASHOUT}x`);
+                console.log(`   ✅ Max Loss: ₹${CONFIG.MAX_SESSION_LOSS}`);
+                console.log(`   ✅ Profit Target: ₹${CONFIG.PROFIT_TARGET}\n`);
+                console.log('💡 Want to change settings? Type "config" or just press Enter to continue with cookies:\n');
                 
-                rl.question('Choose setup type (1 for Quick, 2 for Custom): ', (setupChoice) => {
-                    if (setupChoice === '1') {
-                        console.log('✅ Using default trading settings:');
-                        console.log(`   Base Bet: ₹${CONFIG.BASE_BET}`);
-                        console.log(`   Cashout: ${CONFIG.NORMAL_CASHOUT}x`);
-                        console.log(`   Max Loss: ₹${CONFIG.MAX_SESSION_LOSS}\n`);
-                        configureCookies();
-                    } else {
-                        console.log('🔧 Custom configuration selected...\n');
+                rl.question('Press Enter to continue or type "config" for custom settings: ', (choice) => {
+                    if (choice.toLowerCase() === 'config') {
+                        console.log('🔧 Opening custom configuration...\n');
                         configureTradingSettings();
+                    } else {
+                        console.log('✅ Using default settings. Setting up authentication...\n');
+                        configureCookies();
                     }
                 });
             }
