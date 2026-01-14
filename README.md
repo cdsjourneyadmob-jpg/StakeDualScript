@@ -36,8 +36,8 @@ Maximize your profits with our sophisticated bot that alternates between Crash �
 
 ## 📞 Support & Purchase
 
-- **Telegram**: [@YourTelegramHandle](https://t.me/your_telegram_handle)
-- **Email**: your-email@example.com
+
+- **Email**: harryverma0002@gmail.com
 
 ## 🛡️ Risk Disclaimer
 
