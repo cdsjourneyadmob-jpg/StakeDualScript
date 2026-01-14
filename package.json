@@ -17,7 +17,11 @@
   },
   "pkg": {
     "assets": [
-      "licenses.json"
+      "licenses.json",
+      "node_modules/axios/**/*"
+    ],
+    "scripts": [
+      "node_modules/axios/**/*.js"
     ],
     "outputPath": "dist"
   },
