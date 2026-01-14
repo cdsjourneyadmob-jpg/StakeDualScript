@@ -95,11 +95,11 @@ async function startBot() {
             
             console.log('🎯 Bot Configuration:');
             console.log(`   Strategy: Dual-Game Automation (Crash + Slide)`);
-            console.log(`   Base Bet: ${CONFIG.BASE_BET} ${CONFIG.CURRENCY.toUpperCase()}`);
-            console.log(`   Normal Cashout: ${CONFIG.NORMAL_CASHOUT}x (Conservative)`);
-            console.log(`   Gamble Cashout: ${CONFIG.GAMBLE_CASHOUT}x (Aggressive)`);
-            console.log(`   Max Session Loss: ${CONFIG.MAX_SESSION_LOSS} ${CONFIG.CURRENCY.toUpperCase()}`);
-            console.log(`   Cooldown: ${CONFIG.WAIT_BETWEEN_BETS/1000} seconds between bets\n`);
+            console.log(`   Base Bet: ₹{CONFIG.BASE_BET} ₹{CONFIG.CURRENCY.toUpperCase()}`);
+            console.log(`   Normal Cashout: ₹{CONFIG.NORMAL_CASHOUT}x (Conservative)`);
+            console.log(`   Gamble Cashout: ₹{CONFIG.GAMBLE_CASHOUT}x (Aggressive)`);
+            console.log(`   Max Session Loss: ₹{CONFIG.MAX_SESSION_LOSS} ₹{CONFIG.CURRENCY.toUpperCase()}`);
+            console.log(`   Cooldown: ₹{CONFIG.WAIT_BETWEEN_BETS/1000} seconds between bets\n`);
             
             console.log('🔧 Configuration Required:');
             console.log('   ⚠️  COOKIES & TOKENS NEEDED');
@@ -135,8 +135,8 @@ async function startBot() {
             console.log('   📧 Email: harryverma0002@example.com');
             console.log('   📱 Telegram: @YourTelegramHandle\n');
             console.log('💰 Pricing:');
-            console.log('   Weekly License: $150 (7 days)');
-            console.log('   Monthly License: $499 (30 days)\n');
+            console.log('   Weekly License: ₹150 (7 days)');
+            console.log('   Monthly License: ₹499 (30 days)\n');
             console.log('🔄 Contact us for license renewal or new purchase');
         }
         

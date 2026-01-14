@@ -19,8 +19,8 @@ npm run admin
 2. Enter license key (or press Enter for random 9-digit key)
 3. Choose license type:
    - `1` = trial (7 days) - Free trial
-   - `2` = weekly (7 days) - $150 payment
-   - `3` = monthly (30 days) - $499 payment
+   - `2` = weekly (7 days) - ₹150 payment
+   - `3` = monthly (30 days) - ₹499 payment
    - `4` = admin (permanent) - For you only
 4. Enter customer email
 5. License is automatically created with start/end dates
@@ -43,8 +43,8 @@ npm run admin
 | Type | Duration | Price | Use Case |
 |------|----------|-------|----------|
 | trial | 7 days | Free | New customer trial |
-| weekly | 7 days | $150 | Short-term users |
-| monthly | 30 days | $499 | Main revenue stream |
+| weekly | 7 days | ₹150 | Short-term users |
+| monthly | 30 days | ₹499 | Main revenue stream |
 | admin | Permanent | N/A | Your access only |
 
 ## Customer Workflow
@@ -131,9 +131,9 @@ The `licenses.json` file stores all licenses:
 ## Revenue Tracking
 
 ### Monthly Revenue Example:
-- 10 weekly licenses × $150 = $1,500
-- 20 monthly licenses × $499 = $9,980
-- **Total**: $11,480/month
+- 10 weekly licenses × ₹150 = ₹1,500
+- 20 monthly licenses × ₹499 = ₹9,980
+- **Total**: ₹11,480/month
 
 ### Growth Strategy:
 1. **Start with trials** - Build trust

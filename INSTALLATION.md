@@ -122,8 +122,8 @@ npm test
 
 ## 💰 Pricing
 
-- **Weekly**: $150 (7 days)
-- **Monthly**: $499 (30 days)
+- **Weekly**: ₹150 (7 days)
+- **Monthly**: ₹499 (30 days)
 - **Contact**: [Telegram](https://t.me/your_telegram_handle)
 
 ---

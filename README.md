@@ -15,8 +15,8 @@ Maximize your profits with our sophisticated bot that alternates between Crash �
 
 ## 💰 Pricing
 
-- **Weekly License**: $150 (7 days)
-- **Monthly License**: $499 (30 days)
+- **Weekly License**: ₹150 (7 days)
+- **Monthly License**: ₹499 (30 days)
 
 ## 🚀 Quick Start
 

@@ -23,8 +23,8 @@
 
 **You need a valid license key to run the bot:**
 
-- **Weekly License**: $150 (7 days)
-- **Monthly License**: $499 (30 days)
+- **Weekly License**: ₹150 (7 days)
+- **Monthly License**: ₹499 (30 days)
 
 **Get Your License:**
 - **Whatsapp**: +917018238245
