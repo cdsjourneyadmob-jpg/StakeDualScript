@@ -105,3 +105,11 @@ crypto-keys.json
 # Compiled binaries
 dist/
 build/
+
+# Obfuscated code (for distribution)
+obfuscated/
+
+# Distribution packages
+releases/
+*.zip
+*.tar.gz

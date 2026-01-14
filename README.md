@@ -20,12 +20,14 @@ Maximize your profits with our sophisticated bot that alternates between Crash �
 
 ## 🚀 Quick Start
 
-1. **Purchase License** - Contact us for license key
-2. **Install**: `npm install`
-3. **Run**: `npm start`
+1. **Purchase License** - [Get your license key here](./DOWNLOAD.md)
+2. **Download Bot** - [Choose your platform](./DOWNLOAD.md)
+3. **Run Executable** - No installation needed!
 4. **Enter License Key** when prompted
-5. **Update Cookies** in dualbet.js with your Stake.com session
+5. **Configure Cookies** following our [setup guide](./INSTALLATION.md)
 6. **Start Earning!**
+
+[📥 **DOWNLOAD NOW**](./DOWNLOAD.md)
 
 ## 📊 Performance Stats
 
